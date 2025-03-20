@@ -2,18 +2,26 @@
 
 /* Initial rules */
 /* Task 1.2.3 Start of your solution */
+// A number X is even if its remainder when divided by 2 is 0
+even(X) :-  X mod 2 == 0       
+        .
+
+// A number X is odd if its remainder when divided by 2 is 1
+odd(X) :-   X mod 2 == 1
+        .
+
 /* Task 1.2.3 End of your solution */
 
 /* Initial goals */
 !start_sum(4,2). // uncomment for Task 1.2.1
 !start_sum(4,-2). // uncomment for Task 1.2.1
-//!start_division(4,2). // uncomment for Task 1.2.2
-//!start_division(4,2.5). // uncomment for Task 1.2.2
-//!start_division(4,0). // uncomment for Task 1.2.2
-//!start_even_or_odd(4). // uncomment for Task 1.2.3
-//!start_even_or_odd(5). // uncomment for Task 1.2.3
-//!start_list_generation(0,4). // uncomment for Task 1.2.4
-//!print_list([0,1,2,3,4]). // uncomment for an example of handling a list with recursion
+!start_division(4,2). // uncomment for Task 1.2.2
+!start_division(4,2.5). // uncomment for Task 1.2.2
+!start_division(4,0). // uncomment for Task 1.2.2
+!start_even_or_odd(4). // uncomment for Task 1.2.3
+!start_even_or_odd(5). // uncomment for Task 1.2.3
+!start_list_generation(0,4). // uncomment for Task 1.2.4
+// !print_list([0,1,2,3,4]). // uncomment for an example of handling a list with recursion
 
 /* 
  * Plan for reacting to the addition of the goal !start_sum
@@ -34,19 +42,35 @@
 +!compute_sum(X,Y,Sum)
     : true
     <-
-        .print("Implement Task 1.2.1");
+        Sum = X + Y;
+        .print("The sum is: ", Sum);
     .
 /* Task 1.2.1 End of your solution */
+
 
 @start_division_task_1_2_2_plan
 +!start_division(Dividend,Divisor)
     :   true
     <- 
         !compute_division(Dividend, Divisor, Quotient);
-        .print(Dividend, "/", Divisor, "=", Quotient);
     .
 
 /* Task 1.2.2 Start of your solution */
+@compute_division_zero_task_1_2_2_plan
++!compute_division(Dividend, Divisor, _)
+    : Divisor = 0
+    <-
+        .print("Division not possible: Divisor is 0.");
+    .
+
+@compute_division_normal_task_1_2_2_plan
++!compute_division(Dividend, Divisor, Quotient)
+    : not(Divisor = 0)
+    <-
+        Quotient = Dividend / Divisor;
+        .print(Dividend, "/", Divisor, "=", Quotient);
+    .
+
 /* Task 1.2.2 End of your solution */
 
 /* 
@@ -116,7 +140,41 @@
     .
 
 /* Task 1.2.4 Start of your solution */
-// You are allowed to use a triggering event other than the one provided 
+// You are allowed to use a triggering event other than the one provided
+// Recursive plan: Continue computing the list when Start is <= End
+@compute_list_recurse
++!compute_list(Start, End, Acc, List)
+    : Start <= End
+    <-
+        NewAcc = [Start | Acc]; 
+        NewStart = Start + 1;  
+        !compute_list(NewStart, End, NewAcc, List);
+    .
+
+@compute_list_complete
++!compute_list(Start, End, Acc, List)
+    : Start > End
+    <-
+        !manual_reverse(Acc, [], List);
+    .
+
+// Base case for reversing the list
+@reverse_base
++!manual_reverse([], ReversedAcc, ReversedList)
+    : true
+    <-
+        ReversedList = ReversedAcc; 
+    .
+
+// Recursive step for reversing the list
+@reverse_recurse
++!manual_reverse([Head | Tail], ReversedAcc, ReversedList)
+    : true
+    <-
+        NewReversedAcc = [Head | ReversedAcc]; 
+        !manual_reverse(Tail, NewReversedAcc, ReversedList); 
+    .
+
 /* Task 1.2.4 End of your solution */
 
 /* 
