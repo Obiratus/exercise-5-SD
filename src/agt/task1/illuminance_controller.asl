@@ -2,24 +2,26 @@
 
 /* Initial rules */
 
+// Task 1.1 4.)
 // Inference rule for inferring the belief requires_brightening if the target illuminance is higher than the current illuminance
 requires_brightening
     :-  target_illuminance(Target) 
         & current_illuminance(Current)
-        & Target  > Current
+        & Target - Current >= 100
     .
 
+// Task 1.1 4.)
 // Inference rule for inferring the belief requires_darkening if the target illuminance is lower than the current illuminance
 requires_darkening
     :-  target_illuminance(Target)  
         & current_illuminance(Current)
-        & Target < Current
+        & Current - Target >= 100
     .
 
 /* Initial beliefs */
 
 // The agent believes that the target illuminance is 400 lux
-target_illuminance(400).
+target_illuminance(350).
 
 /* Initial goals */
 
@@ -41,6 +43,56 @@ target_illuminance(400).
         !start;
     .
 
+/* Task 1.1 1.)
+ * Plan for reacting to the addition of the goal !manage_illuminance
+ * Triggering event: addition of goal !manage_illuminance
+ * Context: the agent believes that the current illuminance equals the target illuminance
+ * Body: prints a message indicating the design objective has been achieved
+*/
+@illuminance_achieved_plan
++!manage_illuminance
+    :   current_illuminance(Current)
+        & target_illuminance(Target)
+        & Current = Target
+    <-  
+        .print("The target illuminance of ", Target, " lux has been achieved");
+    .
+
+
+/* Task 1.1 4.)
+ * Plan for reacting to the addition of the goal !manage_illuminance
+ * Triggering event: addition of goal !manage_illuminance
+ * Context: the agent believes that the current illuminance is within a tolerance range around the target illuminance
+ * Body: prints a message indicating that the illuminance is within the tolerance range
+ */
+@illuminance_within_tolerance_plan
++!manage_illuminance
+    :   current_illuminance(Current)
+        & target_illuminance(Target)
+        & Target - Current < 100
+        & Current - Target < 100
+    <-
+        .print("The illuminance is within the tolerance range of the target: ", Target, " lux.");
+    .
+
+
+/* Task 1.1 2.)
+ * Plan for reacting to the addition of the goal !manage_illuminance
+ * Triggering event: addition of goal !manage_illuminance
+ * Context: the agent believes that the blinds are lowered and that the room requires brightening
+ * Body: the agent performs the action of raising the blinds
+*/
+@increase_illuminance_with_blinds_plan
++!manage_illuminance
+    :   weather("sunny")
+        &  blinds("lowered")
+        &  requires_brightening
+    <-
+        .print("It is sunny. Raising the blinds");
+        raiseBlinds; // performs the action of raising the blinds
+    .
+
+
 /* 
  * Plan for reacting to the addition of the goal !manage_illuminance
  * Triggering event: addition of goal !manage_illuminance
@@ -55,6 +107,7 @@ target_illuminance(400).
         .print("Turning on the lights");
         turnOnLights; // performs the action of turning on the lights
     .
+
 
 /* 
  * Plan for reacting to the addition of the goal !manage_illuminance
@@ -71,20 +124,6 @@ target_illuminance(400).
         turnOffLights; // performs the action of turning off the lights
     .
 
-/* 
- * Plan for reacting to the addition of the goal !manage_illuminance
- * Triggering event: addition of goal !manage_illuminance
- * Context: the agent believes that the blinds are lowered and that the room requires brightening
- * Body: the agent performs the action of raising the blinds
-*/
-@increase_illuminance_with_blinds_plan
-+!manage_illuminance
-    :   blinds("lowered")
-        &  requires_brightening
-    <-
-        .print("Raising the blinds");
-        raiseBlinds; // performs the action of raising the blinds
-    .
 
 /* 
  * Plan for reacting to the addition of the goal !manage_illuminance
@@ -100,6 +139,22 @@ target_illuminance(400).
         .print("Lowering the blinds");
         lowerBlinds; // performs the action of lowering the blinds
     .
+
+/* Task 1.1 3.)
+ * Plan for reacting to the deletion of the belief weather("sunny")
+ * Triggering event: deletion of belief weather("sunny")
+ * Context: the agent believes that the blinds are currently raised
+ * Body: lowers the blinds
+*/
+@lower_blinds_on_weather_change_plan
+-weather("sunny")
+    : blinds("raised")
+    <-
+        .print("The weather is no longer sunny. Lowering the blinds");
+        lowerBlinds; // performs the action of lowering the blinds
+    .
+
+
 /* 
  * Plan for reacting to the addition of the belief current_illuminance(Current)
  * Triggering event: addition of belief current_illuminance(Current)
