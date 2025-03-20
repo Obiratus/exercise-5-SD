@@ -3,12 +3,14 @@
 /* Initial rules */
 /* Task 1.2.3 Start of your solution */
 // A number X is even if its remainder when divided by 2 is 0
-even(X) :-  X mod 2 == 0       
-        .
+even(X) 
+    :-  X mod 2 == 0       
+    .
 
 // A number X is odd if its remainder when divided by 2 is 1
-odd(X) :-   X mod 2 == 1
-        .
+odd(X) 
+    :-   X mod 2 == 1
+    .
 
 /* Task 1.2.3 End of your solution */
 
